@@ -35,7 +35,7 @@ export type OnboardingEmailParams = {
 	 *  ships `plain`, everything else `rich`. The preview/compare pages set this to
 	 *  force one for QA. */
 	htmlStyle?: OnboardingEmailHtmlStyle
-	/** Used to build the verification and unsubscribe links. */
+	/** Used to build the verification link. */
 	airtable_id: string
 }
 

@@ -43,11 +43,7 @@ function renderBlock(block: EmailBlock): string {
  *  approach of the existing MailerSend exports (email-templates/*.json) rather than
  *  modern CSS, for email-client compatibility. No logo image is used (avoids a
  *  broken-image risk for a first version) — just a text wordmark. */
-export function renderHtml(
-	blocks: EmailBlock[],
-	copy: LanguageCopy,
-	unsubscribeUrl: string
-): string {
+export function renderHtml(blocks: EmailBlock[], copy: LanguageCopy): string {
 	const rows = blocks.map(renderBlock).join('')
 
 	return `<!doctype html>
@@ -78,9 +74,6 @@ ${rows}
 <tr>
 <td style="padding: 20px 32px 28px 32px; border-top: 1px solid ${BORDER};">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td style="padding: 4px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: ${MUTED};">${mdLineToHtml(copy.unsubscribeLine(unsubscribeUrl), MUTED)}</td>
-</tr>
 <tr>
 <td style="padding: 4px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: ${MUTED};">${escapeHtml(copy.addressLine)}</td>
 </tr>

@@ -41,7 +41,6 @@ export type LanguageCopy = {
 	signoffFound: (leader: string, chapterName: string) => string
 	signoffFallback: string
 	linksHeading: string
-	unsubscribeLine: (url: string) => string
 	addressLine: string
 }
 
@@ -87,7 +86,6 @@ const en: LanguageCopy = {
 	signoffFound: (leader, chapterName) => `${leader} and the PauseAI ${chapterName} Team`,
 	signoffFallback: 'Maxime and The PauseAI Global Team',
 	linksHeading: 'Follow along',
-	unsubscribeLine: (url) => `Don't want to receive these emails? [Unsubscribe here](${url}).`,
 	addressLine: 'PauseAI, Box C5957, Kwikstaartlaan 42, 3704GS Zeist, The Netherlands'
 }
 
@@ -142,8 +140,6 @@ const fr: LanguageCopy = {
 	signoffFound: (leader, chapterName) => `${leader} et l'équipe PauseAI ${chapterName}`,
 	signoffFallback: "Maxime et l'équipe PauseAI Global",
 	linksHeading: 'Suivez-nous',
-	unsubscribeLine: (url) =>
-		`Vous ne souhaitez plus recevoir ces e-mails ? [Se désabonner ici](${url}).`,
 	addressLine: 'PauseAI, Box C5957, Kwikstaartlaan 42, 3704GS Zeist, Pays-Bas'
 }
 
@@ -196,8 +192,6 @@ const es: LanguageCopy = {
 	signoffFound: (leader, chapterName) => `${leader} y el equipo de PauseAI ${chapterName}`,
 	signoffFallback: 'Maxime y el equipo de PauseAI Global',
 	linksHeading: 'Síguenos',
-	unsubscribeLine: (url) =>
-		`¿No quieres recibir estos correos? [Cancelar suscripción aquí](${url}).`,
 	addressLine: 'PauseAI, Box C5957, Kwikstaartlaan 42, 3704GS Zeist, Países Bajos'
 }
 

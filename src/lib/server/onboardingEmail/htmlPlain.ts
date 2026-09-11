@@ -44,15 +44,10 @@ function renderBlock(block: EmailBlock): string {
 
 /** Plain-text-feel HTML wrapper. Table layout is kept (email-client width control)
  *  but carries no visual styling of its own. A small PauseAI wordmark sits at the
- *  foot, above the unsubscribe/address lines — same placement as the pre-migration
+ *  foot, above the address line — same placement as the pre-migration
  *  PauseAI UK template. `logoUrl` must be absolute (email clients don't resolve
  *  relative paths); pass '' to omit it. */
-export function renderHtmlPlain(
-	blocks: EmailBlock[],
-	copy: LanguageCopy,
-	unsubscribeUrl: string,
-	logoUrl: string
-): string {
+export function renderHtmlPlain(blocks: EmailBlock[], copy: LanguageCopy, logoUrl: string): string {
 	const body = blocks.map(renderBlock).join('\n')
 
 	const logo = logoUrl
@@ -76,8 +71,7 @@ export function renderHtmlPlain(
 <td>
 ${body}
 ${logo}
-<p style="font-family: ${FONT}; color: ${MUTED}; font-size: 12px; line-height: 1.5; margin: ${logo ? '0' : '28px'} 0 4px 0;">${mdLineToHtml(copy.unsubscribeLine(unsubscribeUrl), MUTED)}</p>
-<p style="font-family: ${FONT}; color: ${MUTED}; font-size: 12px; line-height: 1.5; margin: 0;">${escapeHtml(copy.addressLine)}</p>
+<p style="font-family: ${FONT}; color: ${MUTED}; font-size: 12px; line-height: 1.5; margin: ${logo ? '0' : '28px'} 0 0 0;">${escapeHtml(copy.addressLine)}</p>
 </td>
 </tr>
 </table>

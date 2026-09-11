@@ -26,11 +26,10 @@ export async function renderOnboardingEmail(
 	params: OnboardingEmailParams
 ): Promise<RenderedOnboardingEmail> {
 	if (!params.airtable_id) {
-		throw new Error('airtable_id is required to build verification/unsubscribe links')
+		throw new Error('airtable_id is required to build the verification link')
 	}
 
 	const verificationLink = `${url}/verify?table=join&${verificationParameter}=${params.airtable_id}`
-	const unsubscribeLink = `${url}/api/unsubscribe?${verificationParameter}=${params.airtable_id}`
 
 	const language =
 		params.languageOverride ?? resolveOnboardingEmailLanguage(params.country, params.languages)
@@ -54,13 +53,11 @@ export async function renderOnboardingEmail(
 	// otherwise the matched chapter decides (UK -> plain); otherwise rich.
 	const htmlStyle = params.htmlStyle ?? override?.htmlStyle ?? 'rich'
 	const html =
-		htmlStyle === 'plain'
-			? renderHtmlPlain(blocks, copy, unsubscribeLink, logoUrl)
-			: renderHtml(blocks, copy, unsubscribeLink)
+		htmlStyle === 'plain' ? renderHtmlPlain(blocks, copy, logoUrl) : renderHtml(blocks, copy)
 
 	return {
 		subject,
 		html,
-		text: renderText(blocks, copy, unsubscribeLink)
+		text: renderText(blocks, copy)
 	}
 }
