@@ -34,7 +34,7 @@ function renderBlock(block: EmailBlock): string {
 			const links = block.items
 				.map(
 					(item) =>
-						`<a href="${item.url}" style="color: ${LINK}; text-decoration: none;">${escapeHtml(item.label)}</a>`
+						`<a href="${escapeHtml(item.url)}" style="color: ${LINK}; text-decoration: none;">${escapeHtml(item.label)}</a>`
 				)
 				.join('&nbsp;&nbsp;&middot;&nbsp;&nbsp;')
 			return `<p style="${P_STYLE}">${links}</p>`

@@ -31,7 +31,7 @@ function renderBlock(block: EmailBlock): string {
 			const links = block.items
 				.map(
 					(item) =>
-						`<a href="${item.url}" style="color: ${ACCENT}; text-decoration: underline;">${escapeHtml(item.label)}</a>`
+						`<a href="${escapeHtml(item.url)}" style="color: ${ACCENT}; text-decoration: underline;">${escapeHtml(item.label)}</a>`
 				)
 				.join('&nbsp;&nbsp;&middot;&nbsp;&nbsp;')
 			return `<tr><td style="padding: 10px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.8;">${links}</td></tr>`

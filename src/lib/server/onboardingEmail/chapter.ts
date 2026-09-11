@@ -59,10 +59,12 @@ function recordToChapterBlock(record: AirtableRecord<AirtableNationalGroup>): Ch
 	const leaderNames = (record.fields.leaders_name ?? []).map((n) => n.trim()).filter(Boolean)
 	const leader = leaderNames.length > 0 ? leaderNames.join(' and ') : GLOBAL_FALLBACK.leader
 
+	// These are free-text Airtable fields, so anything that is not a plain web link is dropped
+	// rather than rendered into an href.
 	const links: ChapterLink[] = LINK_FIELDS.map(({ field, label }) => {
 		const value = record.fields[field]
 		return { label, url: typeof value === 'string' ? value.trim() : '' }
-	}).filter((link) => link.url.length > 0)
+	}).filter((link) => /^https?:\/\//i.test(link.url))
 
 	const xIndex = links.findIndex((link) => link.label === 'X')
 	links.splice(xIndex === -1 ? links.length : xIndex + 1, 0, BLUESKY_LINK)
@@ -87,9 +89,18 @@ export async function getChapterForOnboardingEmail(
 	const cleanCountry = (country ?? '').trim()
 	if (!cleanCountry) return GLOBAL_FALLBACK
 
-	const records = await fetchAllPages<AirtableNationalGroup>(fetch, AIRTABLE_URL, [], {
-		filterByFormula: 'NOT({inactive})'
-	})
+	// Uncached and on every send, so a rate limit or an Airtable blip must not fail the render:
+	// the caller would then send the fallback template, a different email, rather than this one
+	// without its chapter block.
+	let records: readonly AirtableRecord<AirtableNationalGroup>[]
+	try {
+		records = await fetchAllPages<AirtableNationalGroup>(fetch, AIRTABLE_URL, [], {
+			filterByFormula: 'NOT({inactive})'
+		})
+	} catch (error) {
+		console.error('National Groups lookup failed, rendering without a chapter:', error)
+		return GLOBAL_FALLBACK
+	}
 
 	const match = records.find(
 		(record) => normalizeCountry(record.fields.country ?? '') === normalizeCountry(cleanCountry)
