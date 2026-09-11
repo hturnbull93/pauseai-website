@@ -81,12 +81,14 @@ describe('renderOnboardingEmail', () => {
 		expect((await render('', 'Act now')).subject).toBe('Thanks for taking action with PauseAI')
 	})
 
-	it('uses the UK override for every UK signup', async () => {
+	it('uses the UK override for every UK signup, one version per group', async () => {
 		for (const intent of ['None', 'Volunteer']) {
 			const email = await render('United Kingdom', intent)
 			expect(email.subject).toBe('Welcome to PauseAI UK Alex!')
 			expect(email.text).toContain('F0nj2RjLNeB1P1hyoDFsTz')
 		}
+		expect((await render('United Kingdom', 'Volunteer')).text).toContain('book a 10 minute call')
+		expect((await render('United Kingdom', 'None')).text).toContain('PS: if you have questions')
 	})
 
 	it("does not let a signup's name render as a link", async () => {

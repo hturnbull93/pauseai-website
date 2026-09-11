@@ -41,7 +41,7 @@ export async function resolveOnboardingEmail(
 ): Promise<OnboardingEmailResolution> {
 	const bucket = resolveIntentBucket(params.intent)
 	const group = groupOf(bucket)
-	const override = getChapterOverride(params.country)
+	const override = getChapterOverride(params.country, group)
 	const detected =
 		params.languageOverride ?? resolveOnboardingEmailLanguage(params.country, params.languages)
 
@@ -74,10 +74,10 @@ export async function renderOnboardingEmail(
 
 	const resolution = await resolveOnboardingEmail(params)
 	const { bucket, group, language, chapter } = resolution
-	const override = getChapterOverride(params.country)
+	const override = getChapterOverride(params.country, group)
 	const firstName = stripMarkdown(params.firstName)
 	const content = override
-		? override.content(group, firstName)
+		? override.content(firstName)
 		: baseContent(language === 'es' ? 'es' : 'en', bucket, chapter, firstName)
 	const fixed = FIXED_COPY[language]
 	const blocks = composeBlocks(content, fixed, bucket, verificationLink)
