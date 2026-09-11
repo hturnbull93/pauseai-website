@@ -88,4 +88,9 @@ describe('renderOnboardingEmail', () => {
 			expect(email.text).toContain('F0nj2RjLNeB1P1hyoDFsTz')
 		}
 	})
+
+	it("does not let a signup's name render as a link", async () => {
+		const email = await render('', 'None', '[Verify here](https://example.com)')
+		expect(email.html).not.toContain('href="https://example.com"')
+	})
 })

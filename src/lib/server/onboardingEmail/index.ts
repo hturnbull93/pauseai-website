@@ -7,6 +7,7 @@ import { FIXED_COPY } from './fixed.js'
 import { renderHtml } from './html.js'
 import { renderHtmlPlain } from './htmlPlain.js'
 import { resolveOnboardingEmailLanguage } from './language.js'
+import { stripMarkdown } from './markdown.js'
 import { renderText } from './text.js'
 import type {
 	ChapterBlockData,
@@ -74,9 +75,10 @@ export async function renderOnboardingEmail(
 	const resolution = await resolveOnboardingEmail(params)
 	const { bucket, group, language, chapter } = resolution
 	const override = getChapterOverride(params.country)
+	const firstName = stripMarkdown(params.firstName)
 	const content = override
-		? override.content(group, params.firstName)
-		: baseContent(language === 'es' ? 'es' : 'en', bucket, chapter, params.firstName)
+		? override.content(group, firstName)
+		: baseContent(language === 'es' ? 'es' : 'en', bucket, chapter, firstName)
 	const fixed = FIXED_COPY[language]
 	const blocks = composeBlocks(content, fixed, bucket, verificationLink)
 

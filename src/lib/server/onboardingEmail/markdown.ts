@@ -5,6 +5,13 @@
 const LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g
 const BOLD_PATTERN = /\*\*([^*]+)\*\*/g
 
+/** For values a signup typed, interpolated into copy: without this a first name like
+ *  `[Verify here](https://…)` would render as a link, in an email that is also CC'd to the
+ *  chapter's onboarder. */
+export function stripMarkdown(text: string): string {
+	return text.replace(/[[\]*]/g, '')
+}
+
 export function escapeHtml(text: string): string {
 	return text
 		.replace(/&/g, '&amp;')
