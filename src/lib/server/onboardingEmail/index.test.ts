@@ -13,8 +13,8 @@ const CHAPTERS: Record<string, ChapterBlockData> = {
 }
 
 vi.mock('./chapter.js', () => ({
-	getChapterForOnboardingEmail: async (country: string | undefined) =>
-		CHAPTERS[(country ?? '').trim().toLowerCase()] ?? null
+	getChapterForOnboardingEmail: (country: string | undefined) =>
+		Promise.resolve(CHAPTERS[(country ?? '').trim().toLowerCase()] ?? null)
 }))
 
 const { renderOnboardingEmail } = await import('./index.js')

@@ -56,6 +56,7 @@
 		<p>
 			The panel under the form shows what the inputs resolved to (intent bucket, chapter). Toggle
 			HTML / plain text with the button below it. See
+			<!-- eslint-disable-next-line svelte/no-restricted-html-elements -- dev-only QA page, not site chrome -->
 			<a href="/onboarding-email-compare">/onboarding-email-compare</a> to check a render against the
 			pre-migration MailerSend template it replaces.
 		</p>

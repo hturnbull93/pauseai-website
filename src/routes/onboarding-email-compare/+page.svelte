@@ -63,8 +63,10 @@
 			</li>
 		</ul>
 		<p>
-			See <a href="/onboarding-email-preview">/onboarding-email-preview</a> to drive the new render
-			off arbitrary inputs instead. Dev tool: not linked from the site, available on
+			See
+			<!-- eslint-disable-next-line svelte/no-restricted-html-elements -- dev-only QA page, not site chrome -->
+			<a href="/onboarding-email-preview">/onboarding-email-preview</a> to drive the new render off
+			arbitrary inputs instead. Dev tool: not linked from the site, available on
 			<code>localhost</code> and Netlify deploy previews only, 404s on the production domain. Template
 			and chapter data are public, not PII.
 		</p>
