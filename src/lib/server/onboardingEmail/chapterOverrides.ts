@@ -24,6 +24,17 @@ export type ResolvedOverride = {
 const VIDEO_URL = 'https://www.youtube.com/watch?v=ZHxJwv4TdJo'
 const GLOBAL_DISCORD_URL = 'https://discord.gg/gTymKVFs7Z'
 
+// The footer row the Global templates carry.
+const GLOBAL_SOCIALS: ChapterLink[] = [
+	{ label: 'YouTube', url: 'https://www.youtube.com/@PauseAI' },
+	{ label: 'Discord', url: 'https://discord.gg/2XXWXvErfA' },
+	{ label: 'Instagram', url: 'https://www.instagram.com/pause_ai/' },
+	{ label: 'X', url: 'https://twitter.com/PauseAI' },
+	{ label: 'Bluesky', url: 'https://bsky.app/profile/pauseai.bsky.social' },
+	{ label: 'TikTok', url: 'https://tiktok.com/@pauseai' },
+	{ label: 'Facebook', url: 'https://www.facebook.com/PauseAI/' }
+]
+
 // Both UK emails are ported from the live PauseAI UK templates. The WhatsApp link is the
 // "PauseAI UK Waiting Room" invite; the UK chapter row's link opens a London protests group.
 const UK_WHATSAPP = 'https://chat.whatsapp.com/F0nj2RjLNeB1P1hyoDFsTz'
@@ -126,13 +137,101 @@ const uk: ChapterOverride = {
 	}
 }
 
+// From the live PauseAI Canada volunteer template (x2p0347j3r94zdrn), confirmed current.
+// Canada has no email of its own for non-volunteers, who get the shared copy, as today.
+const CANADA_NATIONAL_CALL = 'https://luma.com/calendar/cal-tsYv79s4aTQC16Q'
+const CANADA_MONTREAL_CALL = 'https://luma.com/pauseaimtl'
+
+const canada: ChapterOverride = {
+	name: 'PauseAI Canada',
+	language: 'en',
+	content: {
+		volunteer: (firstName) => ({
+			subject: `Welcome to PauseAI Canada ${firstName}!`,
+			greeting: [
+				{ type: 'heading', text: `Welcome to PauseAI Canada ${firstName}` },
+				{
+					type: 'paragraph',
+					text: "**Let's Work Together to Stop the Development of Dangerous AI**"
+				}
+			],
+			body: [
+				{ type: 'paragraph', text: 'Thank you for registering with PauseAI Canada!' },
+				{
+					type: 'paragraph',
+					text: "PauseAI is an international, decentralized, grassroots movement, dedicated to pausing frontier AI development until we can prove it's safe and keep it under democratic control."
+				},
+				{
+					type: 'paragraph',
+					text: 'You can find out more about PauseAI Canada [here](https://pauseai.ca/en/) and PauseAI Global [here](https://pauseai.info/). Watch the video below for a summary of the Pause position:'
+				},
+				{ type: 'paragraph', text: `[Video Introduction](${VIDEO_URL})` },
+				{ type: 'heading', text: 'First Steps to Get Involved:' },
+				{ type: 'paragraph', text: '**1. Connect With Your Community**' },
+				{
+					type: 'paragraph',
+					text: "PauseAI Canada was founded in May of 2025 so we're still quite a young organization, but we're growing and eagerly seeking individuals who want to get involved. Although we don't yet have this for the PauseAI Canada website, the Global site does have a page that can guide you through ways to get involved."
+				},
+				{
+					type: 'paragraph',
+					text: `We have a monthly video call at 9pm ET / 8pm CT / 6pm PT on the second Wednesday. [Register here](${CANADA_NATIONAL_CALL}) (Canada). If you are in Montréal, [register for the Montréal call](${CANADA_MONTREAL_CALL}) (every third Wednesday at 7pm).`
+				},
+				{ type: 'paragraph', text: '**2. Sign Our Digital Public Statement**' },
+				{
+					type: 'paragraph',
+					text: "Haven't signed yet? [This statement](https://pauseai.info/statement) sums up what PauseAI Global is advocating for. Sign it to take your first step pushing for the responsible development of artificial intelligence."
+				},
+				{ type: 'heading', text: 'How We Create Change' },
+				{ type: 'paragraph', text: 'At PauseAI, we believe in the power of collective action.' },
+				{
+					type: 'paragraph',
+					text: 'By coming together as concerned citizens to protest, persuade the public, and write to our decision-makers we can influence the necessary change to advocate for a pause on the most advanced AI development.'
+				},
+				{ type: 'paragraph', text: "As a volunteer, you'll have opportunities to participate in:" },
+				{
+					type: 'list',
+					items: [
+						'Online actions (petitions, social media campaigns, letter-writing to officials)',
+						'Offline activities (local protests, community meetings, awareness events)',
+						'Local chapter initiatives.'
+					]
+				},
+				{
+					type: 'paragraph',
+					text: 'Your participation, whether big or small, matters greatly in our collective effort to ensure AI development proceeds safely and ethically.'
+				},
+				{ type: 'heading', text: "What's Next" },
+				{
+					type: 'paragraph',
+					text: "After meeting with the community via our Welcome meetings or through your National Chapter, you'll be informed of the next action, but if you're looking for a step to take right now, check out our [Action page](https://pauseai.info/action)."
+				}
+			],
+			signoff: [
+				{
+					type: 'paragraph',
+					text: 'Welcome aboard! Together, we can take action to prevent the catastrophic impacts of the development of Artificial Intelligence.'
+				},
+				{ type: 'paragraph', text: "We're glad to have you on board!" },
+				{ type: 'paragraph', text: 'Jeremy Eliosoff' },
+				{ type: 'paragraph', text: 'National Leader' },
+				{ type: 'paragraph', text: 'PauseAI Canada' },
+				{ type: 'links', items: GLOBAL_SOCIALS }
+			]
+		})
+	}
+}
+
 /** The override for a Members `country` value and group, or null for the shared copy.
  *  Countries are matched as the live script matches them, with `includes`. */
 export function getChapterOverride(
 	country: string | undefined,
 	group: IntentGroup
 ): ResolvedOverride | null {
-	const override = country?.includes('United Kingdom') ? uk : null
+	const override = country?.includes('United Kingdom')
+		? uk
+		: country?.includes('Canada')
+			? canada
+			: null
 	const content = override?.content[group]
 	return override && content ? { name: override.name, language: override.language, content } : null
 }

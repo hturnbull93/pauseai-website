@@ -91,6 +91,15 @@ describe('renderOnboardingEmail', () => {
 		expect((await render('United Kingdom', 'None')).text).toContain('PS: if you have questions')
 	})
 
+	it('gives Canada its own volunteer email but the shared copy otherwise', async () => {
+		const volunteer = await render('Canada', 'Volunteer')
+		expect(volunteer.subject).toBe('Welcome to PauseAI Canada Alex!')
+		expect(volunteer.text).toContain('monthly video call')
+
+		const nonVolunteer = await render('Canada', 'Act now')
+		expect(nonVolunteer.subject).toBe('Thanks for taking action with PauseAI')
+	})
+
 	it("does not let a signup's name render as a link", async () => {
 		const email = await render('', 'None', '[Verify here](https://example.com)')
 		expect(email.html).not.toContain('href="https://example.com"')
