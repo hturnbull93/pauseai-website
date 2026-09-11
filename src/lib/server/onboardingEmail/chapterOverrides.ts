@@ -221,6 +221,47 @@ const canada: ChapterOverride = {
 	}
 }
 
+// Adapted from the welcome email PauseAI Sverige's chapter lead sends by hand, with the
+// fixed lines added in Swedish. DRAFT: the Swedish is ours, not theirs, and is waiting on
+// their review. Three of the links they send are on no chapter record, so until they give
+// us those the override stays off and Swedish signups get the shared copy.
+const SWEDEN = {
+	calendar: '',
+	whatsapp: '',
+	petition: '',
+	facebook: 'https://www.facebook.com/groups/1495728531358793/',
+	website: 'https://pauseai.se/'
+}
+
+const swedenHasEveryLink = Object.values(SWEDEN).every((link) => link.length > 0)
+
+const swedenContent = (firstName: string): EmailContent => ({
+	subject: `Välkommen till PauseAI Sverige, ${firstName}!`,
+	htmlStyle: 'plain',
+	greeting: [{ type: 'paragraph', text: `Hej ${firstName} och välkommen till PauseAI Sverige!` }],
+	body: [
+		{ type: 'paragraph', text: `I [vår kalender](${SWEDEN.calendar}) hittar du nästa intromöte.` },
+		{
+			type: 'paragraph',
+			text: `Övrig kommunikation sker främst via [WhatsApp](${SWEDEN.whatsapp}). Vi har även en [Facebook-grupp](${SWEDEN.facebook}).`
+		},
+		{
+			type: 'paragraph',
+			text: `Skriv gärna på [vår namninsamling](${SWEDEN.petition}) och kika på [vår hemsida](${SWEDEN.website}) för fler tips på vad du kan göra.`
+		}
+	],
+	signoff: [
+		{ type: 'paragraph', text: 'Mvh' },
+		{ type: 'paragraph', text: 'Carl, PauseAI Sverige' }
+	]
+})
+
+const sweden: ChapterOverride = {
+	name: 'PauseAI Sverige',
+	language: 'sv',
+	content: { volunteer: swedenContent, 'non-volunteer': swedenContent }
+}
+
 /** The override for a Members `country` value and group, or null for the shared copy.
  *  Countries are matched as the live script matches them, with `includes`. */
 export function getChapterOverride(
@@ -231,7 +272,9 @@ export function getChapterOverride(
 		? uk
 		: country?.includes('Canada')
 			? canada
-			: null
+			: country?.includes('Sweden') && swedenHasEveryLink
+				? sweden
+				: null
 	const content = override?.content[group]
 	return override && content ? { name: override.name, language: override.language, content } : null
 }

@@ -100,6 +100,13 @@ describe('renderOnboardingEmail', () => {
 		expect(nonVolunteer.subject).toBe('Thanks for taking action with PauseAI')
 	})
 
+	// Sweden's override is off until the chapter gives us the links it is missing.
+	it('falls back to the shared copy for Sweden while its override is incomplete', async () => {
+		const email = await render('Sweden', 'Volunteer')
+		expect(email.subject).toBe('Welcome to PauseAI, Alex!')
+		expect(email.text).toContain('PauseAI Sweden will be in touch')
+	})
+
 	it("does not let a signup's name render as a link", async () => {
 		const email = await render('', 'None', '[Verify here](https://example.com)')
 		expect(email.html).not.toContain('href="https://example.com"')

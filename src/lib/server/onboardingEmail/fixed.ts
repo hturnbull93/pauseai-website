@@ -43,4 +43,13 @@ const es: FixedCopy = {
 	addressLine: 'PauseAI, Box C5957, Kwikstaartlaan 42, 3704GS Zeist, Países Bajos'
 }
 
-export const FIXED_COPY: Record<OnboardingEmailLanguage, FixedCopy> = { en, es }
+// DRAFT, awaiting review by PauseAI Sweden: nobody fluent has read these yet.
+const sv: FixedCopy = {
+	confirm: (link) =>
+		`Bekräfta din e-postadress genom att klicka på [den här länken](${link}). Om du inte har anmält dig kan du bortse från det här meddelandet.`,
+	newsletter: () =>
+		'Om du har valt att prenumerera håller vi dig uppdaterad om nyheter, kampanjer och sätt att engagera dig. Oavsett det kan vi ibland skicka dig en kritisk varning.',
+	addressLine: 'PauseAI, Box C5957, Kwikstaartlaan 42, 3704GS Zeist, Nederländerna'
+}
+
+export const FIXED_COPY: Record<OnboardingEmailLanguage, FixedCopy> = { en, es, sv }
