@@ -32,6 +32,13 @@ function parseLanguage(value: string | null): BaseLanguage {
 	return LANGUAGES.includes(value as BaseLanguage) ? (value as BaseLanguage) : DEFAULTS.language
 }
 
+// The renderer builds absolute asset URLs on pauseai.info, where these images only exist
+// once this is merged and deployed. Point them at whatever origin is serving this page so
+// the preview shows the real logo on a deploy preview too.
+function withLocalAssets(html: string, origin: string): string {
+	return html.replaceAll('https://pauseai.info/pauseai-', `${origin}/pauseai-`)
+}
+
 export const load: PageServerLoad = async ({ url }) => {
 	if (!dev && !isAllowedHost(url.hostname)) error(404, 'Not found')
 
@@ -57,6 +64,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		airtable_id: 'previewRecordId123'
 	}
 	const rendered = await renderOnboardingEmail(renderParams)
+	rendered.html = withLocalAssets(rendered.html, url.origin)
 
 	const chapterCountries = await listActiveChapterCountries()
 

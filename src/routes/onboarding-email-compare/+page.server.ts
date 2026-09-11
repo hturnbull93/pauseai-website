@@ -30,6 +30,13 @@ function isAllowedHost(hostname: string): boolean {
 const DEFAULT_TEMPLATE_KEY: LegacyTemplateKey = 'DEFAULT'
 const PREVIEW_RECORD_ID = 'previewRecordId123'
 
+// The renderer builds absolute asset URLs on pauseai.info, where these images only exist
+// once this is merged and deployed. Point them at whatever origin is serving this page so
+// the preview shows the real logo on a deploy preview too.
+function withLocalAssets(html: string, origin: string): string {
+	return html.replaceAll('https://pauseai.info/pauseai-', `${origin}/pauseai-`)
+}
+
 export const load: PageServerLoad = async ({ url }) => {
 	if (!dev && !isAllowedHost(url.hostname)) error(404, 'Not found')
 
@@ -68,6 +75,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		airtable_id: PREVIEW_RECORD_ID
 	}
 	const rendered = await renderOnboardingEmail(renderParams)
+	rendered.html = withLocalAssets(rendered.html, url.origin)
 
 	return {
 		form: { firstName, templateKey, intent, style: htmlStyle ?? 'auto' },
