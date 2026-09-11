@@ -1,4 +1,5 @@
-import type { LanguageCopy } from './copy.js'
+import type { FixedCopy } from './fixed.js'
+import type { OnboardingEmailLanguage } from './types.js'
 import type { EmailBlock } from './blocks.js'
 import { escapeHtml, mdLineToHtml } from './markdown.js'
 
@@ -47,7 +48,12 @@ function renderBlock(block: EmailBlock): string {
  *  foot, above the address line — same placement as the pre-migration
  *  PauseAI UK template. `logoUrl` must be absolute (email clients don't resolve
  *  relative paths); pass '' to omit it. */
-export function renderHtmlPlain(blocks: EmailBlock[], copy: LanguageCopy, logoUrl: string): string {
+export function renderHtmlPlain(
+	blocks: EmailBlock[],
+	fixed: FixedCopy,
+	language: OnboardingEmailLanguage,
+	logoUrl: string
+): string {
 	const body = blocks.map(renderBlock).join('\n')
 
 	const logo = logoUrl
@@ -55,7 +61,7 @@ export function renderHtmlPlain(blocks: EmailBlock[], copy: LanguageCopy, logoUr
 		: ''
 
 	return `<!doctype html>
-<html lang="en">
+<html lang="${language}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -71,7 +77,7 @@ export function renderHtmlPlain(blocks: EmailBlock[], copy: LanguageCopy, logoUr
 <td>
 ${body}
 ${logo}
-<p style="font-family: ${FONT}; color: ${MUTED}; font-size: 12px; line-height: 1.5; margin: ${logo ? '0' : '28px'} 0 0 0;">${escapeHtml(copy.addressLine)}</p>
+<p style="font-family: ${FONT}; color: ${MUTED}; font-size: 12px; line-height: 1.5; margin: ${logo ? '0' : '28px'} 0 0 0;">${escapeHtml(fixed.addressLine)}</p>
 </td>
 </tr>
 </table>

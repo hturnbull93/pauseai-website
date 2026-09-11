@@ -1,18 +1,23 @@
-import type { LanguageCopy } from './copy.js'
+import type { FixedCopy } from './fixed.js'
 import type { EmailBlock } from './blocks.js'
+
+// `**bold**` has no plain-text form, and the old templates' plain_text carried none.
+function stripBold(text: string): string {
+	return text.replace(/\*\*([^*]+)\*\*/g, '$1')
+}
 
 /** Renders blocks + footer to plain text, matching the `[label](url)` markdown-link
  *  style already used in the existing templates' `plain_text` fields. */
-export function renderText(blocks: EmailBlock[], copy: LanguageCopy): string {
+export function renderText(blocks: EmailBlock[], fixed: FixedCopy): string {
 	const parts: string[] = []
 
 	for (const block of blocks) {
 		switch (block.type) {
 			case 'heading':
-				parts.push(block.text)
+				parts.push(stripBold(block.text))
 				break
 			case 'paragraph':
-				parts.push(block.text)
+				parts.push(stripBold(block.text))
 				break
 			case 'list':
 				parts.push(
@@ -27,7 +32,7 @@ export function renderText(blocks: EmailBlock[], copy: LanguageCopy): string {
 		}
 	}
 
-	parts.push(copy.addressLine)
+	parts.push(fixed.addressLine)
 
 	return parts.join('\n\n')
 }

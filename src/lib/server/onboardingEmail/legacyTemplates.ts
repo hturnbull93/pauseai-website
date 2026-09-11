@@ -7,7 +7,7 @@
 // template is instead picked by hand from a dropdown, paired with the
 // country/language/intent combo it used to be sent for.
 
-import type { OnboardingEmailLanguage } from './types.js'
+import type { BaseLanguage } from './types.js'
 
 type RawTemplate = {
 	id: string
@@ -50,7 +50,8 @@ type LegacyTemplateDef = {
 	 *  can be overridden there. */
 	canonical: {
 		country: string
-		language: OnboardingEmailLanguage
+		/** `fr` only for the Canada FR template, which never sent; the new render has no French. */
+		language: BaseLanguage | 'fr'
 		intent: string
 	}
 }
@@ -84,12 +85,12 @@ const DEFS: LegacyTemplateDef[] = [
 	{
 		key: 'NOT_VOLUNTEERING',
 		filePrefix: 'not-volunteering-',
-		canonical: { country: '', language: 'en', intent: 'Keep informed' }
+		canonical: { country: '', language: 'en', intent: 'None' }
 	},
 	{
 		key: 'UK_NON_VOLUNTEERING',
 		filePrefix: 'uk-non-volunteering-',
-		canonical: { country: 'United Kingdom', language: 'en', intent: 'Keep informed' }
+		canonical: { country: 'United Kingdom', language: 'en', intent: 'None' }
 	}
 ]
 

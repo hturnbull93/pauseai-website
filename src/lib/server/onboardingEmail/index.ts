@@ -1,13 +1,21 @@
 import { url, verificationParameter } from '$lib/config.js'
+import { baseContent } from './copy.js'
+import { composeBlocks, groupOf, resolveIntentBucket } from './blocks.js'
 import { getChapterForOnboardingEmail } from './chapter.js'
-import { resolveOnboardingEmailLanguage } from './language.js'
-import { LANGUAGE_COPY } from './copy.js'
-import { buildEmailBlocks, resolveIntentBucket } from './blocks.js'
 import { getChapterOverride } from './chapterOverrides.js'
+import { FIXED_COPY } from './fixed.js'
 import { renderHtml } from './html.js'
 import { renderHtmlPlain } from './htmlPlain.js'
+import { resolveOnboardingEmailLanguage } from './language.js'
 import { renderText } from './text.js'
-import type { OnboardingEmailParams, RenderedOnboardingEmail } from './types.js'
+import type {
+	ChapterBlockData,
+	IntentBucket,
+	IntentGroup,
+	OnboardingEmailLanguage,
+	OnboardingEmailParams,
+	RenderedOnboardingEmail
+} from './types.js'
 
 export type {
 	OnboardingEmailParams,
@@ -16,11 +24,44 @@ export type {
 	OnboardingEmailHtmlStyle
 } from './types.js'
 
+export type OnboardingEmailResolution = {
+	bucket: IntentBucket
+	group: IntentGroup
+	language: OnboardingEmailLanguage
+	/** Name of the chapter override in use, if any. */
+	override: string | null
+	/** Null with an override too: an override carries its own chapter content. */
+	chapter: ChapterBlockData | null
+}
+
+/** Which version of the email a signup gets. Exported for the preview pages. */
+export async function resolveOnboardingEmail(
+	params: OnboardingEmailParams
+): Promise<OnboardingEmailResolution> {
+	const bucket = resolveIntentBucket(params.intent)
+	const group = groupOf(bucket)
+	const override = getChapterOverride(params.country)
+	const detected =
+		params.languageOverride ?? resolveOnboardingEmailLanguage(params.country, params.languages)
+
+	// Spanish speakers share one community, PauseAI en Español, so no country's chapter block
+	// is singled out for them, whichever email they get.
+	const chapter =
+		override || detected === 'es' ? null : await getChapterForOnboardingEmail(params.country)
+
+	return {
+		bucket,
+		group,
+		// Only English has a non-volunteer version, so Spanish non-volunteers get it, as today.
+		language: override ? override.language : group === 'volunteer' ? detected : 'en',
+		override: override?.name ?? null,
+		chapter
+	}
+}
+
 /**
- * Renders the full volunteer-onboarding welcome email (subject + html + text) for a
- * given signup, matrixed on intent x chapter x language. See
- * ~/.claude/projects/-Users-harryturnbull-pauseai-website/memory/project-email-template-redesign.md
- * for the architecture decision record this implements.
+ * Renders the onboarding welcome email (subject + html + text) for a given signup: the
+ * shared copy or a chapter's override, inside the skeleton in blocks.ts.
  */
 export async function renderOnboardingEmail(
 	params: OnboardingEmailParams
@@ -28,36 +69,27 @@ export async function renderOnboardingEmail(
 	if (!params.airtable_id) {
 		throw new Error('airtable_id is required to build the verification link')
 	}
-
 	const verificationLink = `${url}/verify?table=join&${verificationParameter}=${params.airtable_id}`
 
-	const language =
-		params.languageOverride ?? resolveOnboardingEmailLanguage(params.country, params.languages)
-	const copy = LANGUAGE_COPY[language]
-	const bucket = resolveIntentBucket(params.intent)
-	const chapter = await getChapterForOnboardingEmail(params.country)
+	const resolution = await resolveOnboardingEmail(params)
+	const { bucket, group, language, chapter } = resolution
+	const override = getChapterOverride(params.country)
+	const content = override
+		? override.content(group, params.firstName)
+		: baseContent(language === 'es' ? 'es' : 'en', bucket, chapter, params.firstName)
+	const fixed = FIXED_COPY[language]
+	const blocks = composeBlocks(content, fixed, bucket, verificationLink)
 
-	// A matching chapter override (currently just PauseAI UK) swaps in its own
-	// hand-written copy + subject in place of the generic multi-section blocks.
-	const override = getChapterOverride(params.country, language)
-	const blocks = override
-		? override.buildBlocks({ firstName: params.firstName, verificationLink, bucket })
-		: buildEmailBlocks(params, copy, chapter, verificationLink, bucket)
-	const subject = override ? override.subject(params.firstName) : copy.subject(params.firstName)
-
-	// static/pauseai-logo-email.png — the PauseAI wordmark from the pre-migration
-	// PauseAI UK template, re-hosted in the repo. Must be an absolute URL for email.
-	const logoUrl = `${url}/pauseai-logo-email.png`
-
-	// Style precedence: an explicit caller override (the preview/compare pages) wins;
-	// otherwise the matched chapter decides (UK -> plain); otherwise rich.
-	const htmlStyle = params.htmlStyle ?? override?.htmlStyle ?? 'rich'
+	// Must be absolute URLs: email clients don't resolve relative paths.
+	const htmlStyle = params.htmlStyle ?? content.htmlStyle ?? 'rich'
 	const html =
-		htmlStyle === 'plain' ? renderHtmlPlain(blocks, copy, logoUrl) : renderHtml(blocks, copy)
+		htmlStyle === 'plain'
+			? renderHtmlPlain(blocks, fixed, language, `${url}/pauseai-logo-email.png`)
+			: renderHtml(blocks, fixed, language, `${url}/pauseai-icon-email.png`)
 
 	return {
-		subject,
+		subject: content.subject,
 		html,
-		text: renderText(blocks, copy)
+		text: renderText(blocks, fixed)
 	}
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types'
+	import ResolvedSummary from '../onboarding-email-preview/ResolvedSummary.svelte'
 
 	let { data }: { data: PageData } = $props()
 
@@ -142,16 +143,8 @@
 	>
 		<strong>New render inputs:</strong>
 		country <code>{data.newInputs.country || '—'}</code>
-		· language <code>{data.newInputs.language}</code>
 		· intent <code>{data.newInputs.intent || '(empty)'}</code>
-		→ bucket <code>{data.newInputs.intentBucket}</code>
-		· chapter
-		{#if data.newInputs.chapterIsGlobalFallback}
-			<code>Global fallback</code>
-		{:else}
-			<code>{data.newInputs.chapterName}</code> — leader {data.newInputs.chapterLeader},
-			{data.newInputs.chapterLinkCount} link{data.newInputs.chapterLinkCount === 1 ? '' : 's'}
-		{/if}
+		→ <ResolvedSummary resolved={data.resolved} />
 	</div>
 
 	<div style="margin-bottom: 8px;">

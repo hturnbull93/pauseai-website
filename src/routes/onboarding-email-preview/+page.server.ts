@@ -2,16 +2,9 @@ export const prerender = false
 
 import { dev } from '$app/environment'
 import { INTENTS } from '$lib/components/onboarding/options.js'
-import {
-	getChapterForOnboardingEmail,
-	listActiveChapterCountries
-} from '$lib/server/onboardingEmail/chapter.js'
-import { resolveIntentBucket } from '$lib/server/onboardingEmail/blocks.js'
-import { renderOnboardingEmail } from '$lib/server/onboardingEmail/index.js'
-import type {
-	OnboardingEmailHtmlStyle,
-	OnboardingEmailLanguage
-} from '$lib/server/onboardingEmail/types.js'
+import { listActiveChapterCountries } from '$lib/server/onboardingEmail/chapter.js'
+import { renderOnboardingEmail, resolveOnboardingEmail } from '$lib/server/onboardingEmail/index.js'
+import type { BaseLanguage, OnboardingEmailHtmlStyle } from '$lib/server/onboardingEmail/types.js'
 import { error } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
 
@@ -26,19 +19,17 @@ function isAllowedHost(hostname: string): boolean {
 	return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.netlify.app')
 }
 
-// The renderer hand-maintains copy for exactly these three (copy.ts: LANGUAGE_COPY).
-const LANGUAGES: OnboardingEmailLanguage[] = ['en', 'es', 'fr']
+// The shared copy exists in these (copy.ts). Chapter overrides bring their own language.
+const LANGUAGES: BaseLanguage[] = ['en', 'es']
 
 const DEFAULTS = {
-	language: 'en' as OnboardingEmailLanguage,
+	language: 'en' as BaseLanguage,
 	country: 'United Kingdom',
 	intent: 'Volunteer'
 }
 
-function parseLanguage(value: string | null): OnboardingEmailLanguage {
-	return LANGUAGES.includes(value as OnboardingEmailLanguage)
-		? (value as OnboardingEmailLanguage)
-		: DEFAULTS.language
+function parseLanguage(value: string | null): BaseLanguage {
+	return LANGUAGES.includes(value as BaseLanguage) ? (value as BaseLanguage) : DEFAULTS.language
 }
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -51,33 +42,27 @@ export const load: PageServerLoad = async ({ url }) => {
 	const language = parseLanguage(params.get('language'))
 	const country = hasQuery ? (params.get('country') ?? '') : DEFAULTS.country
 	const intent = hasQuery ? (params.get('intent') ?? '') : DEFAULTS.intent
-	// 'auto' (or unset) = let the renderer pick per chapter (UK -> plain, rest ->
+	// 'auto' (or unset) = let the email's content pick (the UK override -> plain, rest ->
 	// rich), matching the production endpoint. 'rich'/'plain' force it.
 	const styleParam = params.get('style')
 	const htmlStyle: OnboardingEmailHtmlStyle | undefined =
 		styleParam === 'plain' || styleParam === 'rich' ? styleParam : undefined
 
-	const rendered = await renderOnboardingEmail({
+	const renderParams = {
 		firstName,
 		country,
 		intent,
 		languageOverride: language,
 		htmlStyle,
 		airtable_id: 'previewRecordId123'
-	})
+	}
+	const rendered = await renderOnboardingEmail(renderParams)
 
 	const chapterCountries = await listActiveChapterCountries()
 
 	// Surfaced in a small "what the inputs resolved to" panel so it's obvious which
 	// branch of the matrix produced the email on screen.
-	const chapter = await getChapterForOnboardingEmail(country)
-	const resolved = {
-		intentBucket: resolveIntentBucket(intent),
-		chapterName: chapter.name,
-		chapterLeader: chapter.leader,
-		chapterIsGlobalFallback: chapter.isGlobalFallback,
-		chapterLinkCount: chapter.links.length
-	}
+	const resolved = await resolveOnboardingEmail(renderParams)
 
 	return {
 		form: { firstName, language, country, intent, style: htmlStyle ?? 'auto' },

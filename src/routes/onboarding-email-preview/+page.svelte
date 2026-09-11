@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types'
+	import ResolvedSummary from './ResolvedSummary.svelte'
 
 	let { data }: { data: PageData } = $props()
 
@@ -39,12 +40,13 @@
 		<ul style="margin: 8px 0; padding-left: 18px;">
 			<li><strong>First name / Intent</strong> — verbatim from the Members record.</li>
 			<li>
-				<strong>Language</strong> — forces the hand-maintained en/es/fr copy (production instead detects
-				it from country + languages).
+				<strong>Language</strong> — forces the shared copy's language, en or es (production instead detects
+				it from country + languages). Non-volunteers get English either way, and a chapter override is
+				always in its own language.
 			</li>
 			<li>
 				<strong>Country</strong> — selects the chapter block; only active National Groups countries are
-				listed, anything else takes the global fallback.
+				listed, anything else gets no chapter block.
 			</li>
 			<li>
 				<strong>Style</strong> — <em>Auto</em> shows what production sends (PauseAI UK → plain
@@ -117,14 +119,14 @@
 				onchange={submitNow}
 				style="width: 100%; font-size: 13px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px;"
 			>
-				<option value="">— none (global fallback) —</option>
+				<option value="">— none (no chapter) —</option>
 				{#each data.options.countries as c}
 					<option value={c}>{c}</option>
 				{/each}
 			</select>
 			<span style="font-size: 12px; color: #888;">
 				Active National Groups records ({data.options.countries.length}). Sets the chapter block
-				only; language is chosen above. Any other country takes the global fallback.
+				only; language is chosen above. Any other country gets no chapter block.
 			</span>
 		</div>
 
@@ -157,14 +159,7 @@
 		style="font-size: 13px; background: #f0f4f8; color: #222; padding: 10px 12px; border-radius: 6px; margin-bottom: 12px;"
 	>
 		<strong>Resolved:</strong>
-		intent bucket <code>{data.resolved.intentBucket}</code>
-		· chapter
-		{#if data.resolved.chapterIsGlobalFallback}
-			<code>Global fallback</code> (no National Groups match)
-		{:else}
-			<code>{data.resolved.chapterName}</code> — leader {data.resolved.chapterLeader},
-			{data.resolved.chapterLinkCount} link{data.resolved.chapterLinkCount === 1 ? '' : 's'}
-		{/if}
+		<ResolvedSummary resolved={data.resolved} />
 	</div>
 
 	<div style="margin-bottom: 8px; font-size: 14px;">

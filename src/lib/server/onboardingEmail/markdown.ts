@@ -1,9 +1,9 @@
-// Minimal markdown-link support: the copy in copy.ts uses `[label](url)`, matching
-// the style already used in the existing MailerSend templates' `plain_text` fields
-// (see email-templates/*.json). Plain text output uses that syntax verbatim; HTML
-// output converts it to a real `<a>` tag.
+// Minimal markdown support: `[label](url)` links, matching the style already used in the
+// existing MailerSend templates' `plain_text` fields (see email-templates/*.json), and
+// `**bold**`. Plain text output keeps the link syntax verbatim; HTML output converts both.
 
 const LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g
+const BOLD_PATTERN = /\*\*([^*]+)\*\*/g
 
 export function escapeHtml(text: string): string {
 	return text
@@ -21,7 +21,9 @@ export function escapeHtml(text: string): string {
  */
 export function mdLineToHtml(text: string, linkColor: string): string {
 	const escaped = escapeHtml(text)
-	return escaped.replace(LINK_PATTERN, (_match, label: string, url: string) => {
-		return `<a href="${url}" style="color: ${linkColor}; text-decoration: underline;">${label}</a>`
-	})
+	return escaped
+		.replace(LINK_PATTERN, (_match, label: string, url: string) => {
+			return `<a href="${url}" style="color: ${linkColor}; text-decoration: underline;">${label}</a>`
+		})
+		.replace(BOLD_PATTERN, '<strong>$1</strong>')
 }

@@ -1,4 +1,5 @@
-import type { LanguageCopy } from './copy.js'
+import type { FixedCopy } from './fixed.js'
+import type { OnboardingEmailLanguage } from './types.js'
 import type { EmailBlock } from './blocks.js'
 import { escapeHtml, mdLineToHtml } from './markdown.js'
 
@@ -41,13 +42,19 @@ function renderBlock(block: EmailBlock): string {
 
 /** Hand-rolled table-based HTML, matching the general inline-styles/table-layout
  *  approach of the existing MailerSend exports (email-templates/*.json) rather than
- *  modern CSS, for email-client compatibility. No logo image is used (avoids a
- *  broken-image risk for a first version) — just a text wordmark. */
-export function renderHtml(blocks: EmailBlock[], copy: LanguageCopy): string {
+ *  modern CSS, for email-client compatibility. The logo is the PauseAI icon the
+ *  MailerSend templates carry; its alt text keeps the name visible where images are
+ *  blocked. */
+export function renderHtml(
+	blocks: EmailBlock[],
+	fixed: FixedCopy,
+	language: OnboardingEmailLanguage,
+	iconUrl: string
+): string {
 	const rows = blocks.map(renderBlock).join('')
 
 	return `<!doctype html>
-<html lang="en">
+<html lang="${language}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,7 +68,7 @@ export function renderHtml(blocks: EmailBlock[], copy: LanguageCopy): string {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: ${CARD_BG}; border-radius: 8px;">
 <tr>
 <td style="padding: 28px 32px 0 32px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-<span style="font-size: 20px; font-weight: 800; color: ${ACCENT}; letter-spacing: 0.3px;">PauseAI</span>
+<img src="${iconUrl}" width="60" height="60" alt="PauseAI" style="display: block; width: 60px; height: 60px; border: 0; color: ${ACCENT}; font-size: 14px; font-weight: 800;">
 </td>
 </tr>
 <tr>
@@ -75,7 +82,7 @@ ${rows}
 <td style="padding: 20px 32px 28px 32px; border-top: 1px solid ${BORDER};">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr>
-<td style="padding: 4px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: ${MUTED};">${escapeHtml(copy.addressLine)}</td>
+<td style="padding: 4px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: ${MUTED};">${escapeHtml(fixed.addressLine)}</td>
 </tr>
 </table>
 </td>
